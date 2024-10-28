@@ -3,8 +3,13 @@ import { UserContext } from './utils/UserContext';
 
 export default function Login(props) {
     const { setUser } = useContext(UserContext);
-    
+
     const [formData, setFormData] = useState({
+        username: '',
+        password: ''
+    })
+
+    const [errors, setErrors] = useState({
         username: '',
         password: ''
     })
@@ -14,15 +19,47 @@ export default function Login(props) {
             ...formData,
             [e.target.name]: e.target.value
         })
+        setErrors({
+            ...errors,
+            [e.target.name]: ''
+        })
+    }
+
+    const formValidation = () => {
+        const EMAIL_REGEX = new RegExp(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i);
+        const err = { ...errors }
+        let isValid = true
+        if (!formData.username) {
+            err.username = "Username must not be empty"
+            isValid = false
+        } else if (!EMAIL_REGEX.test(formData.username)) {
+            isValid = false;
+            err.username = "Please enter valid username/address address!"
+        }
+
+        if (!formData.password) {
+            err.password = "Password must not be empty"
+            isValid = false;
+        }
+
+        if (!isValid) {
+            setErrors(err)
+        }
+
+        return isValid;
     }
 
     const handleFormSubmit = (e) => {
         e.preventDefault();
-        console.log({
-            "FORM DATA": formData
-        })
-        // Call Context State callback
-        setUser(formData)
+
+        if (formValidation()) {
+            console.log({
+                "FORM DATA": formData
+            })
+            // Call Context State callback
+            setUser(formData)
+        }
+
     }
 
     return (
@@ -39,7 +76,9 @@ export default function Login(props) {
                             value={formData.username}
                             onChange={handleChange}
                             placeholder='Enter username'
-                            className='h-[45px] w-full rounded-md border border-black p-3' />
+                            className={`h-[45px] w-full rounded-md border border-black p-3 ${errors.username ? 'border-red-600' : 'border-black'}`}
+                        />
+                        {errors.username && <span className='text-red-600'>{errors.username}</span>}
                     </div>
 
                     <div className='mb-5'>
@@ -51,7 +90,9 @@ export default function Login(props) {
                             value={formData.password}
                             onChange={handleChange}
                             placeholder='Enter password'
-                            className='h-[45px] w-full rounded-md border border-black p-3' />
+                            className={`h-[45px] w-full rounded-md border border-black p-3 ${errors.password ? 'border-red-600' : 'border-black'}`}
+                        />
+                        {errors.password && <span className='text-red-600'>{errors.password}</span>}
                     </div>
 
                     <div className=''>
